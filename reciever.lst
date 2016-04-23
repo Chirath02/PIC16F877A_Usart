@@ -1,4 +1,4 @@
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  1
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -17,157 +17,114 @@ Warning[205]: Found directive in column 1. (List)
                       00008 
                       00566         LIST
                       00003 
+Warning[205]: Found directive in column 1. (ORG)
+0000                  00004 ORG 0x000
+Warning[203]: Found opcode in column 1. (GOTO)
+0000   2809           00005 GOTO MAIN ;MAIN PROGRAM
+                      00006 
+Warning[205]: Found directive in column 1. (ORG)
+0004                  00007 ORG 0x004 ;INTERRUPT 
 Warning[205]: Found directive in column 1. (BANKSEL)
-0000   1683 1303      00004 BANKSEL TRISB
-Warning[203]: Found opcode in column 1. (MOVLW)
-0002   3078           00005 MOVLW 0X78
-Warning[203]: Found opcode in column 1. (MOVWF)
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0003   0086           00006 MOVWF TRISB
-Warning[203]: Found opcode in column 1. (MOVLW)
-0004   30C0           00007 MOVLW 0XC0
-Warning[203]: Found opcode in column 1. (MOVWF)
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0005   0087           00008 MOVWF TRISC
-                      00009 
-                      00010 
-                      00011 ;---CONFIGURE SPBRG FOR DESIRED BAUD RATE
-Warning[203]: Found opcode in column 1. (MOVLW)
-0006   3033           00012 MOVLW D'51' ;WE WILL USE 4800bps 
-Warning[203]: Found opcode in column 1. (MOVWF)
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0007   0099           00013 MOVWF SPBRG ;BAUD AT 4MHZ
-                      00014 
-                      00015         
-                      00016 ;---CONFIGURE TXSTA
-Warning[203]: Found opcode in column 1. (MOVLW)
-0008   3024           00017 MOVLW B'00100100' ;CONFIGURE TXSTA AS :
-Warning[203]: Found opcode in column 1. (MOVWF)
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0009   0098           00018 MOVWF TXSTA ;
-                      00019 ;8 BIT TRANSMISSION - 6.BIT
-                      00020 ;TRANSMIT ENABLED - 5.BIT
-                      00021 ;ASYNCHRONOUS MODE - 4.BIT
-                      00022 ;ENABLE HIGH SPEED BAUD RATE - 2.BIT
-                      00023 
-Warning[203]: Found opcode in column 1. (BCF)
-000A   1283           00024 BCF STATUS, RP0 ;SWITCH TO BANK 00
-                      00025 
+0004   1283 1303      00008 BANKSEL PIR1
+0006                  00009 CHECK:
+Warning[203]: Found opcode in column 1. (BTFSS)
+0006   1E8C           00010 BTFSS PIR1, 5
+Warning[203]: Found opcode in column 1. (GOTO)
+0007   2806           00011 GOTO CHECK
+Warning[203]: Found opcode in column 1. (GOTO)
+0008   281C           00012 GOTO INTERRUPT
+                      00013 
+0009                  00014 MAIN:
 Warning[205]: Found directive in column 1. (BANKSEL)
-000B   1283 1303      00026 BANKSEL PORTB
+0009   1683 1303      00015 BANKSEL TRISB ;PORTB AS OUTPUT FOR SEVEN SEGNMENT LED
 Warning[203]: Found opcode in column 1. (CLRF)
-000D   0186           00027 CLRF PORTB
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  2
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000B   0186           00016 CLRF TRISB
+Warning[203]: Found opcode in column 1. (MOVLW)
+000C   30FF           00017 MOVLW 0XFF  
+Warning[203]: Found opcode in column 1. (MOVWF)
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000D   0087           00018 MOVWF TRISC ;PORTC AS INPUT FOR RECEVING DATA FROM MASTER PIC
+                      00019 
+                      00020 
+                      00021 ;---CONFIGURE PERIPHERAL INTERRUPTS
+Warning[203]: Found opcode in column 1. (MOVLW)
+000E   3020           00022 MOVLW B'00100000' ;DISABLE ALL PERIPHERAL INTERRUPTS EXCEPT RECEIVER
+Warning[203]: Found opcode in column 1. (MOVWF)
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000F   008C           00023 MOVWF PIE1 ;PERIPHERAL INTERRUPT ENABLE/DISABLE
+                      00024 
+                      00025 ;---CONFIGURE GENERAL INTERRUPTS
+Warning[203]: Found opcode in column 1. (MOVLW)
+0010   3040           00026 MOVLW B'01000000' ;DISABLE ALL INTERRUPTS EXCEPT PERIPHERAL
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
+Warning[203]: Found opcode in column 1. (MOVWF)
+0011   008B           00027 MOVWF INTCON ;INTERRUPT CONTROL REGISTER
                       00028 
-                      00029 
-000E                  00030 START:
-                      00031 
+                      00029 ;---CONFIGURE SPBRG FOR DESIRED BAUD RATE
 Warning[203]: Found opcode in column 1. (MOVLW)
-000E   30FF           00032 MOVLW 0XFF
+0012   3033           00030 MOVLW D'51' ;WE WILL USE 4800bps 
 Warning[203]: Found opcode in column 1. (MOVWF)
-000F   00A0           00033 MOVWF 0X20
-                      00034 
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0013   0099           00031 MOVWF SPBRG ;BAUD AT 4MHZ
+                      00032 
+                      00033 ;---CONFIGURE TXSTA
 Warning[203]: Found opcode in column 1. (MOVLW)
-0010   3001           00035 MOVLW 0X01
+0014   3024           00034 MOVLW B'00100100' ;CONFIGURE TXSTA AS :
 Warning[203]: Found opcode in column 1. (MOVWF)
-0011   0086           00036 MOVWF PORTB
-Warning[203]: Found opcode in column 1. (CALL)
-0012   2031           00037 CALL SWITCH
-Warning[203]: Found opcode in column 1. (MOVWF)
-0013   00A0           00038 MOVWF 0X20
-Warning[203]: Found opcode in column 1. (BTFSS)
-0014   1FA0           00039 BTFSS 0X20, 7
-Warning[203]: Found opcode in column 1. (ADDLW)
-0015   3E03           00040 ADDLW 0X03
-                      00041 
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0015   0098           00035 MOVWF TXSTA ;
+                      00036 ;8 BIT TRANSMISSION - 6.BIT
+                      00037 ;TRANSMIT ENABLED - 5.BIT
+                      00038 ;ASYNCHRONOUS MODE - 4.BIT
+                      00039 ;ENABLE HIGH SPEED BAUD RATE - 2.BIT
+                      00040 
+Warning[203]: Found opcode in column 1. (BCF)
+0016   1283           00041 BCF STATUS,RP0 ;SWITCH TO BANK0
+                      00042 
 Warning[203]: Found opcode in column 1. (MOVLW)
-0016   3002           00042 MOVLW 0X02
+0017   3080           00043 MOVLW B'10000000' ;ENABLE SERIAL PORT
 Warning[203]: Found opcode in column 1. (MOVWF)
-0017   0086           00043 MOVWF PORTB
-Warning[203]: Found opcode in column 1. (CALL)
-0018   2031           00044 CALL SWITCH
-Warning[203]: Found opcode in column 1. (MOVWF)
-0019   00A0           00045 MOVWF 0X20
-Warning[203]: Found opcode in column 1. (BTFSS)
-001A   1FA0           00046 BTFSS 0X20, 7
-Warning[203]: Found opcode in column 1. (ADDLW)
-001B   3E02           00047 ADDLW 0X02
+0018   0098           00044 MOVWF RCSTA ;RECEIVE STATUS REG
+                      00045 
+Warning[203]: Found opcode in column 1. (BSF)
+0019   178B           00046 BSF INTCON,7 ;ENABLE ALL UNMASKED INTERRUPTS
+Warning[203]: Found opcode in column 1. (BSF)
+001A   1618           00047 BSF RCSTA,4 ;ENABLE USART RECEIVE
                       00048 
-Warning[203]: Found opcode in column 1. (MOVLW)
-001C   3004           00049 MOVLW 0X04
-Warning[203]: Found opcode in column 1. (MOVWF)
-001D   0086           00050 MOVWF PORTB
-Warning[203]: Found opcode in column 1. (CALL)
-001E   2031           00051 CALL SWITCH
-Warning[203]: Found opcode in column 1. (MOVWF)
-001F   00A0           00052 MOVWF 0X20
-Warning[203]: Found opcode in column 1. (BTFSS)
-0020   1FA0           00053 BTFSS 0X20, 7
-Warning[203]: Found opcode in column 1. (ADDLW)
-0021   3E01           00054 ADDLW 0X01
-                      00055 
-Warning[203]: Found opcode in column 1. (MOVWF)
-0022   00A0           00056 MOVWF 0X20
+001B                  00049 MAIN_LOOP: ;CONTINOUS LOOP
+                      00050         ;BTFSC PORTB,4 ;CHECK IF THE BUTTON IS PRESSED
+001B   281B           00051         GOTO MAIN_LOOP ;IF NOT GOTO CONTINOUS LOOP
+                      00052         ;MOVF TMP_TX,W ;LOAD TMP_TX  
+                      00053         ;MOVWF TXREG ;TO TXREG
+                      00054         ;WE LOAD TMP_TX ON THE INTERRUPT ROUTINE,
+                      00055         ;WHEN AN INFORMATION RECEIVED FROM RX.
+                      00056         ;GOTO MAIN_LOOP ;CONTINOUS LOOP
                       00057 
-Warning[203]: Found opcode in column 1. (BTFSC)
-0023   1BA0           00058 BTFSC 0X20, 7
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  3
+001C                  00058 INTERRUPT:
+001C   138B           00059         BCF INTCON,7 ;DISABLE ALL INTERRUPTS
+001D   1E8C           00060         BTFSS PIR1,5 ;CHECK IF THE RCIF FLAG IS SET
+                      00061 
+001E   0009           00062         RETFIE
+                      00063 
+                      00064 
+                      00065 
+                      00066 
+001F                  00067 TERMINATE:
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-Warning[203]: Found opcode in column 1. (GOTO)
-0024   280E           00059 GOTO START
-                      00060 
-                      00061 
-Warning[205]: Found directive in column 1. (BANKSEL)
-0025   1683 1303      00062 BANKSEL TXSTA
-Warning[203]: Found opcode in column 1. (BSF)
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0027   1698           00063 BSF TXSTA, 5
-                      00064 
-Warning[205]: Found directive in column 1. (BANKSEL)
-0028   1283 1303      00065 BANKSEL TXREG
-Warning[203]: Found opcode in column 1. (MOVF)
-002A   0820           00066 MOVF 0X20, 0
-Warning[203]: Found opcode in column 1. (MOVWF)
-002B   0099           00067 MOVWF TXREG
-                      00068 
-Warning[205]: Found directive in column 1. (BANKSEL)
-002C   1683 1303      00069 BANKSEL TXSTA
-                      00070 
-002E                  00071 LOOP:
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-002E   1A98           00072         BTFSC TXSTA, 5
-002F   282E           00073         GOTO LOOP
-                      00074 
-                      00075 
-                      00076 
-Warning[203]: Found opcode in column 1. (GOTO)
-0030   283A           00077 GOTO TERMINATE
-                      00078 
-                      00079 
-0031                  00080 SWITCH:
-0031   1B06           00081         BTFSC PORTB, 6
-0032   3400           00082         RETLW 0X00
-0033   1A86           00083         BTFSC PORTB, 5
-0034   3403           00084         RETLW 0X03
-0035   1A06           00085         BTFSC PORTB, 4
-0036   3406           00086         RETLW 0X06
-0037   1986           00087         BTFSC PORTB, 3
-0038   3409           00088         RETLW 0X09
-0039   34F0           00089         RETLW 0XF0
-                      00090 
-003A                  00091 TERMINATE:
 Warning[205]: Found directive in column 1. (END)
-                      00092 END
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  4
+                      00068 END
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  4
 
 
 SYMBOL TABLE
@@ -221,17 +178,18 @@ CCPR1L                            00000015
 CCPR2                             0000001B
 CCPR2H                            0000001C
 CCPR2L                            0000001B
+CHECK                             00000006
 CHS0                              00000003
 CHS1                              00000004
 CHS2                              00000005
 CIS                               00000003
-CKE                               00000006
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  5
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  5
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+CKE                               00000006
 CKP                               00000004
 CM0                               00000000
 CM1                               00000001
@@ -281,16 +239,18 @@ INDF                              00000000
 INTCON                            0000000B
 INTE                              00000004
 INTEDG                            00000006
+INTERRUPT                         0000001C
 INTF                              00000001
 IRP                               00000007
-LOOP                              0000002E
-NOT_A                             00000005
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  6
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  6
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+MAIN                              00000009
+MAIN_LOOP                         0000001B
+NOT_A                             00000005
 NOT_ADDRESS                       00000005
 NOT_BO                            00000000
 NOT_BOR                           00000000
@@ -341,15 +301,15 @@ RA2                               00000002
 RA3                               00000003
 RA4                               00000004
 RA5                               00000005
-RB0                               00000000
-RB1                               00000001
-RB2                               00000002
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  7
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  7
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
 RB3                               00000003
 RB4                               00000004
 RB5                               00000005
@@ -400,15 +360,15 @@ SPBRG                             00000099
 SPEN                              00000007
 SREN                              00000005
 SSPADD                            00000093
-SSPBUF                            00000013
-SSPCON                            00000014
-SSPCON2                           00000091
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  8
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  8
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
 SSPEN                             00000005
 SSPIE                             00000003
 SSPIF                             00000003
@@ -418,9 +378,7 @@ SSPM2                             00000002
 SSPM3                             00000003
 SSPOV                             00000006
 SSPSTAT                           00000094
-START                             0000000E
 STATUS                            00000003
-SWITCH                            00000031
 SYNC                              00000004
 T0CS                              00000005
 T0IE                              00000005
@@ -435,7 +393,7 @@ T1SYNC                            00000002
 T2CKPS0                           00000000
 T2CKPS1                           00000001
 T2CON                             00000012
-TERMINATE                         0000003A
+TERMINATE                         0000001F
 TMR0                              00000001
 TMR0IE                            00000005
 TMR0IF                            00000002
@@ -461,13 +419,13 @@ TRISA2                            00000002
 TRISA3                            00000003
 TRISA4                            00000004
 TRISA5                            00000005
-TRISB                             00000086
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE  9
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE  9
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+TRISB                             00000086
 TRISB0                            00000000
 TRISB1                            00000001
 TRISB2                            00000002
@@ -520,13 +478,13 @@ _BODEN_ON                         00003FFF
 _BOREN_OFF                        00003FBF
 _BOREN_ON                         00003FFF
 _CONFIG                           00002007
-_CPD_OFF                          00003FFF
-MPASM  5.48                   TRANSMITTER.ASM   4-23-2016  18:21:20         PAGE 10
+MPASM  5.48                      RECIEVER.ASM   4-23-2016  18:55:36         PAGE 10
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+_CPD_OFF                          00003FFF
 _CPD_ON                           00003EFF
 _CP_ALL                           00001FFF
 _CP_OFF                           00003FFF
@@ -564,16 +522,16 @@ __DEBUG                           1
 
 MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
-0000 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXX------
+0000 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXX- ---------------- ----------------
 
 All other memory blocks unused.
 
-Program Memory Words Used:    58
-Program Memory Words Free:  8134
+Program Memory Words Used:    28
+Program Memory Words Free:  8164
 
 
 Errors   :     0
-Warnings :    44 reported,     0 suppressed
-Messages :     6 reported,     0 suppressed
+Warnings :    26 reported,     0 suppressed
+Messages :     5 reported,     0 suppressed
 
 
